@@ -7,4 +7,9 @@ public class MenuManager : MonoBehaviour
     {
         SceneManager.LoadScene("Nivel 1");
     }
+
+    public void MainMenu()
+    { 
+        SceneManager.LoadScene("Start Screen"); 
+    }
 }
