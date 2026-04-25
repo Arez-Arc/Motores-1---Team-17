@@ -23,17 +23,19 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
-        currentSpeed = walkSpeed;
+        currentSpeed = walkSpeed;    
     }
 
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+  
     }
 
     private void Update()
     {
+        
         HandleMovement();
         HandleMouseLook();
     }
@@ -45,7 +47,7 @@ public class PlayerController : MonoBehaviour
 
         // Detectamos si el jugador quiere correr
         bool isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-
+     
         // Velocidad objetivo segun si corre o camina
         float targetSpeed = isSprinting ? sprintSpeed : walkSpeed;
 

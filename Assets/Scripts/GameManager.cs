@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         SceneManager.LoadScene("End Screen");
+        AudioManager.Instance?.TransitionTo(AudioManager.Instance._mainTheme);
     }
 
     void GameOver()
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         SceneManager.LoadScene("Death Screen");
+        AudioManager.Instance?.TransitionTo(AudioManager.Instance._mainTheme);
     }
 
     public void CollectPart()

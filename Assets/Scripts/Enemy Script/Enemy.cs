@@ -15,7 +15,7 @@ public class Enemy : MonoBehaviour
     [Header("Patrulla")]
     [SerializeField] private float _radiusPatrol = 12f;
     [SerializeField] private float _pointPatrol = 0.6f;
-    [SerializeField] private float _timeWait = 1.0f;
+    private float _timeWait = 1f;
 
     [Header("Rangos")]
     [SerializeField] private float _rangeChase = 10f;
@@ -33,7 +33,7 @@ public class Enemy : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool _drawGizmos = true;
 
-    [Header ("Memoria")]
+    [Header("Memoria")]
     [SerializeField] private float _timeMemory = 4f;
     private float _memoryTimer;
     private Vector3 _lastKnownPosition;
@@ -41,6 +41,8 @@ public class Enemy : MonoBehaviour
     private Vector3 _currentPatrolTarget;
     private float _waitTimer;
     private float _nextAttackTime;
+
+    private bool _chasing = false;
 
     void Reset()
     {
@@ -69,72 +71,85 @@ public class Enemy : MonoBehaviour
             _memoryTimer = _timeMemory;
         }
 
-        switch (_state)
-        {
-            case State.Patrulla:
+            switch (_state)
+            {
+                case State.Patrulla:
 
-                PatrolTick();
+                    PatrolTick();
 
-                if (disToPlayer <= _rangeChase && canSee)
+                    if (disToPlayer <= _rangeChase && canSee)
+                    {
+                        _state = State.Persigue;
+                    }
+
+                    break;
+
+                case State.Persigue:
+
+                if (!_chasing)
                 {
-                    _state = State.Persigue;
+                    _chasing = true;
+                    AudioManager.Instance?.UpdateChaseStatus(true);
                 }
 
-                break;
-
-            case State.Persigue:
-
-                _agent.stoppingDistance = _rangeAttack * 0.9f;
-                _agent.SetDestination(_player.position);
-                _agent.acceleration = 13;
+                    _agent.stoppingDistance = _rangeAttack * 0.9f;
+                    _agent.SetDestination(_player.position);
+                    _agent.acceleration = 13;
+                    
 
                 if (disToPlayer <= _rangeAttack && canSee)
+                    {
+                        _state = State.Ataca;
+                        _agent.ResetPath();
+                    }
+
+                    else if (!canSee || disToPlayer > _rangeChase * _hysteresisFactor)
+                    {
+                        _state = State.Busca;
+                    }
+                    break;
+
+                case State.Ataca:
+
+                    FaceTarget(_player.position);
+
+                    if (Time.time >= _nextAttackTime)
+                    {
+                        DoAttack(disToPlayer);
+                        _nextAttackTime = Time.time + _cooldownAttack;
+                    }
+
+                    if (disToPlayer > _rangeAttack * _hysteresisFactor || !canSee)
+                    {
+                        _state = State.Persigue;
+                    }
+
+                    break;
+
+                case State.Busca:
+
+                if (_chasing)
                 {
-                    _state = State.Ataca;
-                    _agent.ResetPath();
+                    _chasing = false;
+                    AudioManager.Instance?.UpdateChaseStatus(false);
                 }
+                    _agent.stoppingDistance = 0.5f;
+                    _agent.SetDestination(_lastKnownPosition);
 
-                else if (!canSee || disToPlayer > _rangeChase * _hysteresisFactor)
-                {
-                    _state = State.Busca;
-                }
-                break;
+                    if (canSee && disToPlayer <= _rangeChase * _hysteresisFactor)
+                    {
+                        _state = State.Persigue;
+                    }
+                    _memoryTimer -= Time.deltaTime;
 
-            case State.Ataca:
+                    if (_memoryTimer <= 0)
+                    {
+                        _state = State.Patrulla;
+                        PickNewPatrolPoint();
+                    }
 
-                FaceTarget(_player.position);
-
-                if (Time.time >= _nextAttackTime)
-                {
-                    DoAttack(disToPlayer);
-                    _nextAttackTime = Time.time + _cooldownAttack;
-                }
-
-                if (disToPlayer > _rangeAttack * _hysteresisFactor || !canSee)
-                {
-                    _state = State.Persigue;
-                }
-
-                break;
-
-            case State.Busca:
-                _agent.stoppingDistance = 0.5f;
-                _agent.SetDestination(_lastKnownPosition);
-
-                if (canSee && disToPlayer <= _rangeChase * _hysteresisFactor)
-                {
-                    _state = State.Persigue;
-                }
-                _memoryTimer -= Time.deltaTime;
-
-                if (_memoryTimer <= 0)
-                {
-                    _state = State.Patrulla;
-                    PickNewPatrolPoint();
-                }
-
-                break;
-        }   
+                    break;
+            }   
     }
 
     void PatrolTick()
@@ -164,6 +179,8 @@ public class Enemy : MonoBehaviour
         {
             _currentPatrolTarget = point;
             _agent.SetDestination(_currentPatrolTarget);
+
+            _timeWait = Random.Range(1f, 10f);
         }
         else
         {
@@ -214,7 +231,12 @@ public class Enemy : MonoBehaviour
     {
         if (distToPlayer <= _rangeAttack + 0.3f)
         {
-            Debug.Log("Atacando");
+            PlayerHealth health = _player.GetComponent<PlayerHealth>();
+
+            if ( health != null)
+            {
+                health.TakeDamage();
+            }
         }
     }
 

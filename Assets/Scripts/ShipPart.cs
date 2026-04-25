@@ -2,13 +2,12 @@ using UnityEngine;
 
 public class ShipPart : MonoBehaviour
 {
-    AudioSource _audioSource;
-    AudioClip _audioClip;
+    private AudioSource _audioSource;
+    [SerializeField] private AudioClip _audioClip;
 
     private void Start()
     {
         _audioSource = GetComponent<AudioSource>();
-        _audioClip = GetComponent<AudioClip>();
     }
 
     private void OnTriggerEnter(Collider other)
