@@ -15,7 +15,7 @@ public class ShipPart : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             GameManager.Instance.CollectPart();
-            _audioSource.PlayOneShot(_audioClip);
+            AudioSource.PlayClipAtPoint(_audioClip, transform.position);
             gameObject.SetActive(false);
         }
     }

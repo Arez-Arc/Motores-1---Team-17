@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class GameManager : MonoBehaviour
     [Header("Victoria")]
     [SerializeField] private int _totalShipParts = 4;
     private int _partsCollected;
+
+    public static event Action<int, int> OnPartCollected;
 
     private void Awake()
     {
@@ -29,7 +32,7 @@ public class GameManager : MonoBehaviour
         AudioManager.Instance?.TransitionTo(AudioManager.Instance._mainTheme);
     }
 
-    void GameOver()
+    public void GameOver()
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -40,6 +43,8 @@ public class GameManager : MonoBehaviour
     public void CollectPart()
     {
         _partsCollected++;
+        OnPartCollected?.Invoke(_partsCollected, _totalShipParts);
+
         if(_partsCollected == _totalShipParts)
         {
 

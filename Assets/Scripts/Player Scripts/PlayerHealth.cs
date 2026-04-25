@@ -24,6 +24,6 @@ public class PlayerHealth : MonoBehaviour
 
     private void DeadScene()
     {
-        SceneManager.LoadScene("Death Screen");
+        GameManager.Instance.GameOver();
     }
 }

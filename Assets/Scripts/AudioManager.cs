@@ -14,6 +14,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip _mainTheme;
     public AudioClip _ambienceMusic;
     public AudioClip _chaseMusic;
+    public AudioClip _deathSound;
     public AudioMixerSnapshot _snapshot;
 
     [Header("Referencias de Sources")]
@@ -78,6 +79,10 @@ public class AudioManager : MonoBehaviour
 
     public void PlayDeathSound()
     {
+        AudioSource _player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<AudioSource>();
+
+        _player.PlayOneShot(_deathSound);
+    
         return;
     }
 
