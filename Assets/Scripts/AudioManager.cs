@@ -15,17 +15,21 @@ public class AudioManager : MonoBehaviour
     public AudioClip _ambienceMusic;
     public AudioClip _chaseMusic;
     public AudioClip _deathSound;
+    public AudioClip _alertSound;
     public AudioMixerSnapshot _snapshot;
 
     [Header("Referencias de Sources")]
     public AudioSource _sourceA;
     public AudioSource _sourceB;
+    public AudioSource _sourceC;
 
     private AudioSource currentSource;
     private AudioSource nextSource;
+    private AudioSource alertSource;
 
     private int chasingCount = 0;
     private AudioClip actualClip;
+
 
     void Awake()
     {
@@ -42,6 +46,8 @@ public class AudioManager : MonoBehaviour
 
         currentSource = _sourceA;
         nextSource = _sourceB;
+
+        alertSource = _sourceC;
 
         actualClip = _mainTheme;
         currentSource.clip = actualClip;
@@ -86,6 +92,13 @@ public class AudioManager : MonoBehaviour
         return;
     }
 
+    public void PlayAlert()
+    {
+        if(_sourceC != null && _alertSound != null)
+        {
+            _sourceC.PlayOneShot(_alertSound);
+        }
+    }
     IEnumerator CrossfadeCoroutine(float duration)
     {
         nextSource.Play();

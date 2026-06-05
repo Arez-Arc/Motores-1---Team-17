@@ -36,6 +36,9 @@ public class UI : MonoBehaviour
         else if (remaining == 1)
         {
             ShowMessage("Only 1 part left, HURRY");
+        }else if (remaining < 1)
+        {
+            ShowMessage("All the spiders know were you are \n RUN TO THE SPACESHIP");
         }
             
     }
