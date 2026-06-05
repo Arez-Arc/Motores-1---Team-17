@@ -3,7 +3,7 @@ using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {
-    private enum State { Patrulla, Persigue, Ataca, Busca }
+    private enum State { Patrulla, Persigue, Ataca, Busca, Alerta }
     private State _state;
 
     [Header("Referencias")]
@@ -29,6 +29,7 @@ public class Enemy : MonoBehaviour
 
     [Header("Combate")]
     [SerializeField] private float _cooldownAttack = 1.0f;
+    [SerializeField] private float _alertSpeed = 7.0f;
 
     [Header("Debug")]
     [SerializeField] private bool _drawGizmos = true;
@@ -44,13 +45,18 @@ public class Enemy : MonoBehaviour
 
     private bool _chasing = false;
 
+    private readonly int speedHash = Animator.StringToHash("Speed");
+    private readonly int attackHash = Animator.StringToHash("Attack");
+
     void Reset()
     {
         _agent = GetComponent<NavMeshAgent>();
+        _animator = GetComponent<Animator>();
     }
 
     void Start()
     {
+        if (!_animator) _animator = GetComponentInChildren<Animator>();
         if (!_agent) _agent = GetComponent<NavMeshAgent>();
         if (!_player) _player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
@@ -121,7 +127,7 @@ public class Enemy : MonoBehaviour
 
                     if (disToPlayer > _rangeAttack * _hysteresisFactor || !canSee)
                     {
-                        _state = State.Persigue;
+                        _state = GameManager.EnemyAlarmActivated? State.Alerta : State.Persigue;
                     }
 
                     break;
@@ -149,7 +155,25 @@ public class Enemy : MonoBehaviour
                     }
 
                     break;
+
+            case State.Alerta:
+                _agent.stoppingDistance = _rangeAttack * 0.9f;
+                _agent.SetDestination(_player.position);
+
+                if (disToPlayer <= _rangeAttack && canSee)
+                {
+                    _state = State.Ataca;
+                    _agent.ResetPath();
+                }
+                break;
             }   
+
+        if (_animator != null)
+        {
+            float currentSpeed = _agent.velocity.magnitude;
+            _animator.SetFloat(speedHash, currentSpeed);
+
+        }
     }
 
     void PatrolTick()
@@ -229,6 +253,12 @@ public class Enemy : MonoBehaviour
 
     void DoAttack(float distToPlayer)
     {
+
+        if (_animator != null)
+        {
+            _animator.SetTrigger(attackHash);
+        }
+
         if (distToPlayer <= _rangeAttack + 0.3f)
         {
             PlayerHealth health = _player.GetComponent<PlayerHealth>();
@@ -252,6 +282,18 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    public void ActivateAlert()
+    {
+        _state = State.Alerta;
+        _agent.speed = _alertSpeed;
+        _agent.acceleration = 20f;
+
+        if (!_chasing)
+        {
+            _chasing = true;
+            AudioManager.Instance?.UpdateChaseStatus(true);
+        }
+    }
     void OnDrawGizmosSelected()
     {
         if (!_drawGizmos) return;

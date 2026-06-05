@@ -5,7 +5,7 @@ public class MenuManager : MonoBehaviour
 {
     public void LoadScene()
     {
-        SceneManager.LoadScene("Nivel 1");
+        SceneManager.LoadScene("Nivel 1 V2");
         AudioManager.Instance.TransitionTo(AudioManager.Instance._ambienceMusic);
         AudioManager.Instance._snapshot.TransitionTo(2f);
     }
