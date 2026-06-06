@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
-using TMPro.EditorUtilities;
 using System.Collections;
 
 public class GameManager : MonoBehaviour

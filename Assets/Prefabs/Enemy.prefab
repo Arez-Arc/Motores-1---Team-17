@@ -82,8 +82,9 @@ MonoBehaviour:
   _heightVision: 1.6
   _visionMask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 328
   _cooldownAttack: 2
+  _alertSpeed: 7
   _drawGizmos: 1
   _timeMemory: 4
 --- !u!82 &-6392239954861707259
